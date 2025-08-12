@@ -270,6 +270,7 @@ class ToggleUserStatusView(LoginRequiredMixin, UserPassesTestMixin, View):
     def post(self, request, pk):
         user = get_object_or_404(User, pk=pk)
         user.is_blocked = not user.is_blocked
+        user.is_active = not user.is_active
         user.save()
 
         action = "разблокирован" if not user.is_blocked else "заблокирован"
@@ -287,19 +288,11 @@ class AttemptListView(LoginRequiredMixin, ListView):
         return Attempt.objects.filter(mailing__owner=self.request.user)
 
 
-@login_required
-@permission_required("messaging.change_mailing")
-def disable_mailing(request, mailing_id):
-    mailing = get_object_or_404(Mailing, pk=mailing_id)
-    mailing.is_active = False
-    mailing.status = Mailing.COMPLETED
-    mailing.save()
-    return redirect("messaging:mailing_list")
-
-
-class DisableMailingView(View):
-    def get(self, request, pk):
+class DisableMailingView(LoginRequiredMixin, PermissionRequiredMixin, View):
+    permission_required = "messaging.can_finish_mailing"
+    def post(self, request, pk):
         mailing = get_object_or_404(Mailing, pk=pk)
         mailing.is_active = False
+        mailing.status = Mailing.COMPLETED
         mailing.save()
         return redirect("messaging:mailing_list")
