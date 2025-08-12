@@ -1,7 +1,10 @@
+from django.core.mail import send_mail
 from django.core.management.base import BaseCommand
 from django.utils import timezone
+
+from config import settings
 from messaging.models import Mailing
-from messaging.tasks import send_mailing
+
 
 
 class Command(BaseCommand):
@@ -14,21 +17,26 @@ class Command(BaseCommand):
             start_time__lte=now, status=Mailing.CREATED, is_active=True
         ).exclude(end_time__lt=now)
 
-        count = 0
 
         for mailing in mailings:
-            try:
                 mailing.status = Mailing.STARTED
                 mailing.save()
-                send_mailing.delay(mailing.id)
-                count += 1
+                message = mailing.message
+                clients = mailing.clients.all()
 
-                self.stdout.write(f"Started mailing ID {mailing.id}")
-            except Exception as e:
-                self.stdout.write(
-                    self.style.ERROR(
-                        f"Error starting mailing ID {mailing.id}: {str(e)}"
-                    )
-                )
+                for client in clients:
+                    try:
+                        send_mail(
+                            subject=message.subject,
+                            message=message.body,
+                            from_email=settings.DEFAULT_FROM_EMAIL,
+                            recipient_list=[client.email],
+                        )
 
-        self.stdout.write(self.style.SUCCESS(f"Successfully started {count} mailings"))
+                    except Exception as e:
+                        print(f"Ошибка при отправке клиенту {client.email}: {str(e)}")
+                        continue
+
+                mailing.status = "FINISHED"
+                mailing.save()
+
