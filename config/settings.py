@@ -1,5 +1,7 @@
 from pathlib import Path
 import os
+
+from django.conf.global_settings import DEFAULT_FROM_EMAIL
 from dotenv import load_dotenv
 from dis import CACHE
 
@@ -134,12 +136,13 @@ LOGIN_REDIRECT_URL = "messaging:mailing_list"
 
 LOGOUT_REDIRECT_URL = "messaging:mailing_list"
 
-EMAIL_HOST = 'smtp.yandex.ru'
-EMAIL_PORT = 465
-EMAIL_HOST_USER = 'HepoH4uk44@yandex.ru'
-EMAIL_HOST_PASSWORD = 'tjhehxlmubdasvxi'
-EMAIL_USE_TLS = False
-EMAIL_USE_SSL = True
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+EMAIL_PORT = os.getenv('EMAIL_PORT')
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS')
+EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL')
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
 LOGIN_URL = 'users:login'
