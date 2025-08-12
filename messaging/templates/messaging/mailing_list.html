@@ -51,7 +51,7 @@
                            class="btn btn-sm btn-primary" title="Редактировать">
                             <i class="fas fa-edit">Редактировать</i>
                         </a>
-                        <form method="post" action="{% url 'messaging:mailing_send' mailing.pk %}"
+                        <form method="post" action="{% url 'messaging:mailing_send' mailing.pk %}">
                               {% csrf_token %}
                             <button type="submit" class="btn btn-sm btn-warning" title="Отправить">
                                 <i class="fas fa-edit">Отправить</i>
@@ -59,8 +59,8 @@
                         </form>
 
                         {% endif %}
-                        {% if perms.users.can_finish and mailing.status != 'completed' %}
-                        <form action="{% url 'messaging:finish_mailing' mailing.pk %}"
+                        {% if perms.messaging.can_finish_mailing and mailing.status != 'completed' %}
+                        <form action="{% url 'messaging:disable_mailing' mailing.pk %}"
                               method="post" class="d-inline">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-sm btn-warning" title="Завершить">
